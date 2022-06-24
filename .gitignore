@@ -1,0 +1,13 @@
+﻿################################################################################
+# 此 .gitignore 文件已由 Microsoft(R) Visual Studio 自动创建。
+################################################################################
+
+/.vs/MyWebSolution
+/ConfigCenter/DfConfig/.vs/DfConfig
+/ConfigCenter/DfConfig/bin/Debug/net6.0
+/ConfigCenter/DfConfig/obj
+/Helper/DfHelper/.vs/DfHelper
+/Helper/DfHelper/bin/Debug/net6.0
+/Helper/DfHelper/obj
+/Helper/DfHelper.Grpc/bin/Debug/net6.0
+/Helper/DfHelper.Grpc/obj
