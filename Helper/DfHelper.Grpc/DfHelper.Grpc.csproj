@@ -6,4 +6,11 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="protobuf-net.Grpc" Version="1.0.152" />
+    <PackageReference Include="protobuf-net.Grpc.AspNetCore" Version="1.0.152" />
+    <PackageReference Include="protobuf-net.Grpc.AspNetCore.Reflection" Version="1.0.152" />
+    <PackageReference Include="protobuf-net.Grpc.ClientFactory" Version="1.0.152" />
+  </ItemGroup>
+
 </Project>

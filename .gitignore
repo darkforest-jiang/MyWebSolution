@@ -12,3 +12,8 @@
 /Helper/DfHelper.Grpc/bin/Debug/net6.0
 /Helper/DfHelper.Grpc/obj
 /Helper/.vs/Helper
+/Helper/DfHelper.EF/obj
+/ConfigCenter/DfConfig.Model/bin/Debug/net6.0
+/ConfigCenter/DfConfig.Model/obj
+/Common/DfCommon.Model/bin/Debug/net6.0
+/Common/DfCommon.Model/obj

@@ -10,4 +10,10 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Helper\DfHelper.Grpc\DfHelper.Grpc.csproj" />
+    <ProjectReference Include="..\..\Helper\DfHelper\DfHelper.csproj" />
+    <ProjectReference Include="..\DfConfig.Model\DfConfig.Model.csproj" />
+  </ItemGroup>
+
 </Project>
