@@ -14,6 +14,7 @@
     <ProjectReference Include="..\..\Helper\DfHelper.Grpc\DfHelper.Grpc.csproj" />
     <ProjectReference Include="..\..\Helper\DfHelper\DfHelper.csproj" />
     <ProjectReference Include="..\DfConfig.Model\DfConfig.Model.csproj" />
+    <ProjectReference Include="..\DfConfig.Service\DfConfig.Service.csproj" />
   </ItemGroup>
 
 </Project>

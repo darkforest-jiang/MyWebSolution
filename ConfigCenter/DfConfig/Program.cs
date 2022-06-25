@@ -1,6 +1,7 @@
-using DfConfig.Model.Interfaces;
+using DfConfig.Model.GrpcInterfaces;
 using ProtoBuf.Grpc.Server;
 using ProtoBuf.Grpc.Reflection;
+using DfConfig.Service.Context;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddCodeFirstGrpc();//添加Grpc服务
 builder.Services.AddCodeFirstGrpcReflection();//添加Grpc反射
+
+builder.Services.AddScoped<DfConfigDbContextBase, DfConfigSqlserverDbContext>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -30,7 +33,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.UseEndpoints(endpoints => {
-    endpoints.MapGrpcService<IAppKeyService>();//添加Grpc服务路由
+    endpoints.MapGrpcService<IAppKeyGrpcService>();//添加Grpc服务路由
 
     endpoints.MapCodeFirstGrpcReflectionService();//添加Grpc反射服务 使Grpc服务可被发现服务列表
 });

@@ -5,10 +5,10 @@ using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DfConfig.Model.Interfaces
+namespace DfConfig.Model.GrpcInterfaces
 {
     [ServiceContract]
-    public interface IAppKeyService
+    public interface IAppKeyGrpcService
     {
         [OperationContract]
         ValueTask GetAllAppKeys();

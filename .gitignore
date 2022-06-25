@@ -17,3 +17,6 @@
 /ConfigCenter/DfConfig.Model/obj
 /Common/DfCommon.Model/bin/Debug/net6.0
 /Common/DfCommon.Model/obj
+/ConfigCenter/DfConfig.Service/bin/Debug/net6.0
+/ConfigCenter/DfConfig.Service/obj
+/Helper/DfHelper.EF/bin/Debug/net6.0
