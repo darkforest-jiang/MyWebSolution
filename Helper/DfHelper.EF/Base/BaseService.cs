@@ -8,9 +8,8 @@ using System.Threading.Tasks;
 
 namespace DfHelper.EF.Base
 {
-    public class BaseService<TDbContext, Entity> : IBaseService<TDbContext, Entity> 
+    public class BaseService<TDbContext> : IBaseService<TDbContext> 
         where TDbContext : DbContext
-        where Entity : class
     {
 
         /// <summary>
@@ -29,55 +28,18 @@ namespace DfHelper.EF.Base
             //_DbSet.Configuration.LazyLoadingEnabled = false;
         }
 
-        #region 公共函数
-        /// <summary>
-        /// 设置查询结果排序
-        /// </summary>
-        /// <param name="entity"></param>
-        /// <param name="orders"></param>
-        /// <returns></returns>
-        public IQueryable<Entity> GetOrderbyResult(IQueryable<Entity> entity, params IOrderByExpression<Entity>[] orders)
-        {
-            try
-            {
-                IOrderedQueryable<Entity> output = null;
-                if (orders != null)
-                {
-                    foreach (var order in orders)
-                    {
-                        if (output == null)
-                        {
-                            output = order.ApplyOrderBy(entity);
-                        }
-                        else
-                        {
-                            output = order.ApplyThenBy(output);
-                        }
-                    }
-                }
-                return output ?? entity;
-            }
-            catch (Exception ex)
-            {
-
-                throw new Exception(ex.Message, ex);
-            }
-        }
-        #endregion
-
-        #region 实体基础操作
-
+        #region 实体更新
         /// <summary>
         /// 添加单个实体数据
         /// </summary>
         /// <param name="T"></param>
         /// <returns></returns>
-        public int EntityAdd(Entity T)
+        public async Task<int> EntityAdd<Entity>(Entity T, CancellationToken cancellationToken = default) where Entity : class
         {
             try
             {
                 _DbSet.Entry(T).State = EntityState.Added;
-                return _DbSet.SaveChanges();
+                return await _DbSet.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -90,12 +52,12 @@ namespace DfHelper.EF.Base
         /// </summary>
         /// <param name="T"></param>
         /// <returns></returns>
-        public int EntityAdd(List<Entity> T)
+        public async Task<int> EntityAdd<Entity>(List<Entity> T, CancellationToken cancellationToken = default) where Entity : class
         {
             try
             {
                 _DbSet.Set<Entity>().AddRange(T);
-                return _DbSet.SaveChanges();
+                return await _DbSet.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -108,13 +70,13 @@ namespace DfHelper.EF.Base
         /// </summary>
         /// <param name="T"></param>
         /// <returns></returns>
-        public int EntityEdit(Entity T)
+        public async Task<int> EntityEdit<Entity>(Entity T, CancellationToken cancellationToken = default) where Entity : class
         {
             try
             {
                 _DbSet.Set<Entity>().Attach(T);
                 _DbSet.Entry(T).State = EntityState.Modified;
-                return _DbSet.SaveChanges();
+                return await _DbSet.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -128,13 +90,17 @@ namespace DfHelper.EF.Base
         /// <param name="T"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public int EntityEdit(Entity T, params object[] param)
+        public async Task<int> EntityEdit<Entity>(Entity T, CancellationToken cancellationToken = default, params object[] param) where Entity : class
         {
             try
             {
-                Entity v = _DbSet.Set<Entity>().Find(param);
-                _DbSet.Entry(v).CurrentValues.SetValues(T);
-                return _DbSet.SaveChanges();
+                var entity = await _DbSet.Set<Entity>().FindAsync(param);
+                if(entity == null)
+                {
+                    throw new Exception("该实体信息未找到");
+                }
+                _DbSet.Entry(entity).CurrentValues.SetValues(T);
+                return await _DbSet.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -147,7 +113,7 @@ namespace DfHelper.EF.Base
         /// </summary>
         /// <param name="T"></param>
         /// <returns></returns>
-        public int EntityEdit(List<Entity> T)
+        public async Task<int> EntityEdit<Entity>(List<Entity> T, CancellationToken cancellationToken = default) where Entity : class
         {
             try
             {
@@ -156,7 +122,7 @@ namespace DfHelper.EF.Base
                     _DbSet.Set<Entity>().Attach(p);
                     _DbSet.Entry(p).State = EntityState.Modified;
                 }
-                return _DbSet.SaveChanges();
+                return await _DbSet.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -169,13 +135,13 @@ namespace DfHelper.EF.Base
         /// </summary>
         /// <param name="T"></param>
         /// <returns></returns>
-        public int EntityDelete(Entity T)
+        public async Task<int> EntityDelete<Entity>(Entity T, CancellationToken cancellationToken = default) where Entity : class
         {
             try
             {
                 _DbSet.Set<Entity>().Attach(T);
                 _DbSet.Entry(T).State = EntityState.Deleted;
-                return _DbSet.SaveChanges();
+                return await _DbSet.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -188,7 +154,7 @@ namespace DfHelper.EF.Base
         /// </summary>
         /// <param name="where"></param>
         /// <returns></returns>
-        public int EntityDelete(Expression<Func<Entity, bool>> where)
+        public async Task<int> EntityDelete<Entity>(Expression<Func<Entity, bool>> where, CancellationToken cancellationToken = default) where Entity : class
         {
             try
             {
@@ -199,7 +165,7 @@ namespace DfHelper.EF.Base
                     {
                         _DbSet.Entry(item).State = EntityState.Deleted;
                     }
-                    return _DbSet.SaveChanges();
+                    return await _DbSet.SaveChangesAsync(cancellationToken);
                 }
                 return 1;
             }
@@ -214,7 +180,7 @@ namespace DfHelper.EF.Base
         /// </summary>
         /// <param name="T"></param>
         /// <returns></returns>
-        public int EntityDelete(List<Entity> T)
+        public async Task<int> EntityDelete<Entity>(List<Entity> T, CancellationToken cancellationToken = default) where Entity : class
         {
             try
             {
@@ -223,208 +189,60 @@ namespace DfHelper.EF.Base
                     _DbSet.Set<Entity>().Attach(p);
                     _DbSet.Entry(p).State = EntityState.Deleted;
                 }
-                return _DbSet.SaveChanges();
+                return await _DbSet.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message, ex);
             }
         }
+        #endregion
 
+        #region 实体查询
         /// <summary>
-        /// 按条件查询实体数
+        /// 获取一个实体
         /// </summary>
-        /// <typeparam name="S">类型参数,排序对象的类型</typeparam>
+        /// <typeparam name="Entity"></typeparam>
         /// <param name="where"></param>
-        /// <param name="isASC"></param>
-        /// <param name="order"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public IQueryable<Entity> EntityQuery(Expression<Func<Entity, bool>> where, bool isASC, Expression<Func<Entity, object>> order)
+        public async Task<Entity?> FirstOrDefault<Entity>(Expression<Func<Entity, bool>> where, CancellationToken cancellationToken = default) where Entity : class
         {
             try
             {
-                IQueryable<Entity> list = _DbSet.Set<Entity>().Where<Entity>(where);
-                if (isASC)
-                    list = list.OrderBy(order);
-                else
-                    list = list.OrderByDescending(order);
-                return list;
+                var entity = await _DbSet.Set<Entity>().Where(where).FirstOrDefaultAsync(cancellationToken);
+                return entity;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 throw new Exception(ex.Message, ex);
             }
         }
 
         /// <summary>
-        /// 按条件查询实体数(不分页)支持复合排序
+        /// 获取一个实体
         /// </summary>
-        /// <param name="cndLambda">条件</param>
-        /// <param name="orders">排序</param>
-        /// <returns></returns>
-        public IQueryable<Entity> EntityQuery(Expression<Func<Entity, bool>> cndLambda = null, params IOrderByExpression<Entity>[] orders)
-        {
-            try
-            {
-                IQueryable<Entity> list = _DbSet.Set<Entity>();
-                if (cndLambda != null)
-                {
-                    list = list.Where(cndLambda);
-                }
-                IOrderedQueryable<Entity> output = null;
-                if (orders != null)
-                {
-                    foreach (var order in orders)
-                    {
-                        if (output == null)
-                        {
-                            output = order.ApplyOrderBy(list);
-                        }
-                        else
-                        {
-                            output = order.ApplyThenBy(output);
-                        }
-                    }
-                }
-                return output ?? list;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message, ex);
-            }
-        }
-
-        /// <summary>
-        /// 按条件查询实体数,不用缓存
-        /// </summary>
-        /// <typeparam name="S">类型参数,排序对象的类型</typeparam>
+        /// <typeparam name="Entity"></typeparam>
         /// <param name="where"></param>
-        /// <param name="isASC"></param>
         /// <param name="order"></param>
+        /// <param name="isAsc"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public IQueryable<Entity> NonCacheEntityQuery(Expression<Func<Entity, bool>> where, bool isASC, Expression<Func<Entity, object>> order)
+        public async Task<Entity?> FirstOrDefault<Entity>(Expression<Func<Entity, bool>> where, Expression<Func<Entity, object>> order, bool isAsc = true, CancellationToken cancellationToken = default) where Entity : class
         {
             try
             {
-                IQueryable<Entity> list = _DbSet.Set<Entity>().Where(where).AsNoTracking();
-                if (isASC)
-                    list = list.OrderBy(order);
-                else
-                    list = list.OrderByDescending(order);
-                return list;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message, ex);
-            }
-        }
-
-        /// <summary>
-        /// 按条件查询实体数(不分页)支持复合排序
-        /// </summary>
-        /// <param name="cndLambda">条件</param>
-        /// <param name="orders">排序</param>
-        /// <returns></returns>
-        public IQueryable<Entity> NonCacheEntityQuery(Expression<Func<Entity, bool>> cndLambda = null, params IOrderByExpression<Entity>[] orders)
-        {
-            try
-            {
-                IQueryable<Entity> list = _DbSet.Set<Entity>().AsNoTracking();
-                if (cndLambda != null)
+                var query = _DbSet.Set<Entity>().Where(where);
+                if(isAsc)
                 {
-                    list = list.Where(cndLambda).AsNoTracking();
+                    query = query.OrderBy(order);
                 }
-                list = GetOrderbyResult(list, orders);
-                return list;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message, ex);
-            }
-        }
-
-        /// <summary>
-        /// 按条件查询实体数,分页获取,并返回总记录数
-        /// </summary>
-        /// <typeparam name="S">类型参数,排序对象的类型</typeparam>
-        /// <param name="where"></param>
-        /// <param name="isASC"></param>
-        /// <param name="order"></param>
-        /// <param name="page"></param>
-        /// <param name="rows"></param>
-        /// <param name="a"></param>
-        /// <returns></returns>
-        public IQueryable<Entity> EntityQuery(Expression<Func<Entity, bool>> where, bool isASC, Expression<Func<Entity, object>> order, int page, int rows, out int a)
-        {
-            try
-            {
-                IQueryable<Entity> list = _DbSet.Set<Entity>().Where(where);
-                a = list.Count();
-                if (isASC)
-                    list = list.OrderBy(order);
                 else
-                    list = list.OrderByDescending(order);
-                return list.Skip((page - 1) * rows).Take(rows);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message, ex);
-            }
-        }
-
-        /// <summary>
-        /// 按条件查询实体数,分页获取,并返回总记录数 不使用缓存
-        /// </summary>
-        /// <typeparam name="S">类型参数,排序对象的类型</typeparam>
-        /// <param name="where"></param>
-        /// <param name="isASC"></param>
-        /// <param name="order"></param>
-        /// <param name="page"></param>
-        /// <param name="rows"></param>
-        /// <param name="a"></param>
-        /// <returns></returns>
-        public IQueryable<Entity> NonCacheEntityQuery(Expression<Func<Entity, bool>> where, bool isASC, Expression<Func<Entity, object>> order, int page, int rows, out int a)
-        {
-            try
-            {
-                IQueryable<Entity> list = _DbSet.Set<Entity>().Where(where).AsNoTracking();
-                a = list.Count();
-                if (isASC)
-                    list = list.OrderBy(order);
-                else
-                    list = list.OrderByDescending(order);
-                if (rows > 0)
-                    return list.Skip((page - 1) * rows).Take(rows);
-                else
-                    return list;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message, ex);
-            }
-        }
-
-        /// <summary>
-        /// 按条件查询实体数(分页) 支持复合排序
-        /// </summary>
-        /// <param name="pageNumber">当前页数</param>
-        /// <param name="pageSize">每页条数</param>
-        /// <param name="total">总条数</param>
-        /// <param name="cndLambda">条件</param>
-        /// <param name="orders">排序</param>
-        /// <returns></returns>
-        public IQueryable<Entity> NonCacheEntityQuery(int pageNumber, int pageSize, out int total, Expression<Func<Entity, bool>> cndLambda = null, params IOrderByExpression<Entity>[] orders)
-        {
-            try
-            {
-                IQueryable<Entity> list = _DbSet.Set<Entity>();
-                if (cndLambda != null)
                 {
-                    list = list.Where(cndLambda);
+                    query = query.OrderByDescending(order);
                 }
-                list = GetOrderbyResult(list, orders);
-                total = list.Count();
-                return list.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+                var entity = await query.FirstOrDefaultAsync(cancellationToken);
+                return entity;
             }
             catch (Exception ex)
             {
@@ -433,30 +251,26 @@ namespace DfHelper.EF.Base
         }
 
         /// <summary>
-        /// 获取所有数据
+        /// 获取一个实体
         /// </summary>
+        /// <typeparam name="Entity"></typeparam>
+        /// <param name="where"></param>
+        /// <param name="cancellationToken"></param>
+        /// <param name="orders"></param>
         /// <returns></returns>
-        public IQueryable<Entity> EntityQuery()
+        public async Task<Entity?> FirstOrDefault<Entity>(Expression<Func<Entity, bool>> where, CancellationToken cancellationToken = default, params IOrderByExpression<Entity>[] orders) where Entity : class
         {
             try
             {
-                return _DbSet.Set<Entity>().AsQueryable();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message, ex);
-            }
-        }
+                var query = _DbSet.Set<Entity>().Where(where);
 
-        /// <summary>
-        /// 获取所有数据 禁用缓存
-        /// </summary>
-        /// <returns></returns>
-        public IQueryable<Entity> NonCacheEntityQuery()
-        {
-            try
-            {
-                return _DbSet.Set<Entity>().AsQueryable().AsNoTracking();
+                if(orders != null)
+                {
+                    query = GetOrderbyResult(query, orders);
+                }
+
+                var entity = await query.FirstOrDefaultAsync(cancellationToken);
+                return entity;
             }
             catch (Exception ex)
             {
@@ -468,11 +282,11 @@ namespace DfHelper.EF.Base
         /// 获取实体记录条数
         /// </summary>
         /// <returns></returns>
-        public int EntityCount()
+        public async Task<int> EntityCount<Entity>(Expression<Func<Entity, bool>> where, CancellationToken cancellationToken = default) where Entity : class
         {
             try
             {
-                return _DbSet.Set<Entity>().Count();
+                return await _DbSet.Set<Entity>().CountAsync(where, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -481,16 +295,34 @@ namespace DfHelper.EF.Base
         }
 
         /// <summary>
-        /// 根据条件查询单条数据
+        /// 获取所有数据
         /// </summary>
-        /// <param name="whereLambda"></param>
+        /// <typeparam name="Entity"></typeparam>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Entity Find(Expression<Func<Entity, bool>> whereLambda)
+        public IQueryable<Entity> EntityQuery<Entity>() where Entity : class
         {
             try
             {
-                Entity _entity = _DbSet.Set<Entity>().FirstOrDefault(whereLambda);
-                return _entity;
+                return _DbSet.Set<Entity>().AsQueryable();
+            }
+            catch(Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        /// <summary>
+        /// 按条件获取数据
+        /// </summary>
+        /// <typeparam name="Entity"></typeparam>
+        /// <param name="where"></param>
+        /// <returns></returns>
+        public IQueryable<Entity> EntityQuery<Entity>(Expression<Func<Entity, bool>> where) where Entity : class
+        {
+            try
+            {
+                return _DbSet.Set<Entity>().Where(where);
             }
             catch (Exception ex)
             {
@@ -499,16 +331,34 @@ namespace DfHelper.EF.Base
         }
 
         /// <summary>
-        /// 根据条件查询单条数据
+        /// 获取所有数据
         /// </summary>
-        /// <param name="whereLambda"></param>
+        /// <typeparam name="Entity"></typeparam>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Entity NonCacheFind(Expression<Func<Entity, bool>> whereLambda)
+        public async Task<IList<Entity>> EntityQuery<Entity>(CancellationToken cancellationToken = default) where Entity : class
         {
             try
             {
-                Entity _entity = _DbSet.Set<Entity>().AsNoTracking().FirstOrDefault(whereLambda);
-                return _entity;
+                return await EntityQuery<Entity>().ToListAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        /// <summary>
+        /// 按条件获取数据
+        /// </summary>
+        /// <typeparam name="Entity"></typeparam>
+        /// <param name="where"></param>
+        /// <returns></returns>
+        public async Task<IList<Entity>> EntityQuery<Entity>(Expression<Func<Entity, bool>> where, CancellationToken cancellationToken = default) where Entity : class
+        {
+            try
+            {
+                return await EntityQuery<Entity>(where).ToListAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -518,6 +368,38 @@ namespace DfHelper.EF.Base
 
         #endregion
 
+        /// <summary>
+        /// 设置查询结果排序
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="orders"></param>
+        /// <returns></returns>
+        private IQueryable<Entity> GetOrderbyResult<Entity>(IQueryable<Entity> query, params IOrderByExpression<Entity>[] orders) where Entity : class
+        {
+            try
+            {
+                IOrderedQueryable<Entity>? output = null;
+                if (orders != null)
+                {
+                    foreach (var order in orders)
+                    {
+                        if (output == null)
+                        {
+                            output = order.ApplyOrderBy(query);
+                        }
+                        else
+                        {
+                            output = order.ApplyThenBy(output);
+                        }
+                    }
+                }
+                return output ?? query;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
 
     }
 }

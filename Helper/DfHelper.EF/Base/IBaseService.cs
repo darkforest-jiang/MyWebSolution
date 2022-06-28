@@ -8,38 +8,37 @@ using System.Threading.Tasks;
 
 namespace DfHelper.EF.Base
 {
-    public interface IBaseService<TDbContext, Entity> 
+    public interface IBaseService<TDbContext> 
         where TDbContext : DbContext 
-        where Entity : class
     {
-        #region 实体基础操作
+        #region 实体更新
         /// <summary>
         /// 添加单个实体数据
         /// </summary>
         /// <param name="T"></param>
         /// <returns></returns>
-        int EntityAdd(Entity T);
+        Task<int> EntityAdd<Entity>(Entity T, CancellationToken cancellationToken = default) where Entity : class;
 
         /// <summary>
         /// 添加多条实体数据
         /// </summary>
         /// <param name="T"></param>
         /// <returns></returns>
-        int EntityAdd(List<Entity> T);
+        Task<int> EntityAdd<Entity>(List<Entity> T, CancellationToken cancellationToken = default) where Entity : class;
 
         /// <summary>
         /// 修改单个实体数据
         /// </summary>
         /// <param name="T"></param>
         /// <returns></returns>
-        int EntityEdit(Entity T);
+        Task<int> EntityEdit<Entity>(Entity T, CancellationToken cancellationToken = default) where Entity : class;
 
         /// <summary>
         /// 修改多个实体数据
         /// </summary>
         /// <param name="T"></param>
         /// <returns></returns>
-        int EntityEdit(List<Entity> T);
+        Task<int> EntityEdit<Entity>(List<Entity> T, CancellationToken cancellationToken = default) where Entity : class;
 
         /// <summary>
         /// 根据主键更新实体对象
@@ -47,133 +46,104 @@ namespace DfHelper.EF.Base
         /// <param name="T"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        int EntityEdit(Entity T, params object[] param);
+        Task<int> EntityEdit<Entity>(Entity T, CancellationToken cancellationToken = default, params object[] param) where Entity : class;
 
         /// <summary>
         /// 删除单个实体
         /// </summary>
         /// <param name="T"></param>
         /// <returns></returns>
-        int EntityDelete(Entity T);
+        Task<int> EntityDelete<Entity>(Entity T, CancellationToken cancellationToken = default) where Entity : class;
 
         /// <summary>
         /// 删除多个实体数据
         /// </summary>
         /// <param name="T"></param>
         /// <returns></returns>
-        int EntityDelete(List<Entity> T);
+        Task<int> EntityDelete<Entity>(List<Entity> T, CancellationToken cancellationToken = default) where Entity : class;
 
         /// <summary>
         /// 按条件删除实体
         /// </summary>
         /// <param name="where"></param>
         /// <returns></returns>
-        int EntityDelete(Expression<Func<Entity, bool>> where);
+        Task<int> EntityDelete<Entity>(Expression<Func<Entity, bool>> where, CancellationToken cancellationToken = default) where Entity : class;
+        #endregion
+
+        #region 实体查询
+        /// <summary>
+        /// 获取一个实体
+        /// </summary>
+        /// <typeparam name="Entity"></typeparam>
+        /// <param name="where"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<Entity?> FirstOrDefault<Entity>(Expression<Func<Entity, bool>> where, CancellationToken cancellationToken = default) where Entity : class;
 
         /// <summary>
-        /// 获取所有数据
+        /// 获取一个实体
         /// </summary>
+        /// <typeparam name="Entity"></typeparam>
+        /// <param name="where"></param>
+        /// <param name="order"></param>
+        /// <param name="isAsc"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        IQueryable<Entity> EntityQuery();
+        Task<Entity?> FirstOrDefault<Entity>(Expression<Func<Entity, bool>> where, Expression<Func<Entity, object>> order, bool isAsc = true, CancellationToken cancellationToken = default) where Entity : class;
+
+        /// <summary>
+        /// 获取一个实体
+        /// </summary>
+        /// <typeparam name="Entity"></typeparam>
+        /// <param name="where"></param>
+        /// <param name="cancellationToken"></param>
+        /// <param name="orders"></param>
+        /// <returns></returns>
+        Task<Entity?> FirstOrDefault<Entity>(Expression<Func<Entity, bool>> where, CancellationToken cancellationToken = default, params IOrderByExpression<Entity>[] orders) where Entity : class;
 
         /// <summary>
         /// 获取实体记录条数
         /// </summary>
         /// <returns></returns>
-        int EntityCount();
+        Task<int> EntityCount<Entity>(Expression<Func<Entity, bool>> where, CancellationToken cancellationToken = default) where Entity : class;
 
         /// <summary>
-        /// 按条件查询实体数
+        /// 获取所有数据
         /// </summary>
-        /// <typeparam name="S">类型参数,排序对象的类型</typeparam>
+        /// <typeparam name="Entity"></typeparam>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        IQueryable<Entity> EntityQuery<Entity>() where Entity : class;
+
+        /// <summary>
+        /// 按条件获取数据
+        /// </summary>
+        /// <typeparam name="Entity"></typeparam>
         /// <param name="where"></param>
-        /// <param name="isASC"></param>
-        /// <param name="order"></param>
         /// <returns></returns>
-        IQueryable<Entity> EntityQuery(Expression<Func<Entity, bool>> where, bool isASC, Expression<Func<Entity, object>> order);
+        IQueryable<Entity> EntityQuery<Entity>(Expression<Func<Entity, bool>> where) where Entity : class;
 
         /// <summary>
-        /// 按条件查询实体数,不用缓存
+        /// 获取所有数据
         /// </summary>
-        /// <typeparam name="S">类型参数,排序对象的类型</typeparam>
+        /// <typeparam name="Entity"></typeparam>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<IList<Entity>> EntityQuery<Entity>(CancellationToken cancellationToken = default) where Entity : class;
+
+        /// <summary>
+        /// 按条件获取数据
+        /// </summary>
+        /// <typeparam name="Entity"></typeparam>
         /// <param name="where"></param>
-        /// <param name="isASC"></param>
-        /// <param name="order"></param>
         /// <returns></returns>
-        IQueryable<Entity> NonCacheEntityQuery(Expression<Func<Entity, bool>> where, bool isASC, Expression<Func<Entity, object>> order);
+        Task<IList<Entity>> EntityQuery<Entity>(Expression<Func<Entity, bool>> where, CancellationToken cancellationToken = default) where Entity : class;
 
-        /// <summary>
-        /// 按条件查询实体数,分页获取,并返回总记录数 不使用缓存
-        /// </summary>
-        /// <typeparam name="S">类型参数,排序对象的类型</typeparam>
-        /// <param name="where"></param>
-        /// <param name="isASC"></param>
-        /// <param name="order"></param>
-        /// <param name="page"></param>
-        /// <param name="rows"></param>
-        /// <param name="a"></param>
-        /// <returns></returns>
-        IQueryable<Entity> NonCacheEntityQuery(Expression<Func<Entity, bool>> where, bool isASC, Expression<Func<Entity, object>> order, int page, int rows, out int a);
-
-        /// <summary>
-        /// 按条件查询实体数(分页) 支持复合排序
-        /// </summary>
-        /// <param name="pageNumber">当前页数</param>
-        /// <param name="pageSize">每页条数</param>
-        /// <param name="total">总条数</param>
-        /// <param name="cndLambda">条件</param>
-        /// <param name="orders">排序</param>
-        /// <returns></returns>
-        IQueryable<Entity> NonCacheEntityQuery(int pageNumber, int pageSize, out int total, Expression<Func<Entity, bool>> cndLambda = null, params IOrderByExpression<Entity>[] orders);
-
-        /// <summary>
-        /// 按条件查询实体数(不分页)支持复合排序
-        /// </summary>
-        /// <param name="cndLambda">条件</param>
-        /// <param name="orders">排序</param>
-        /// <returns></returns>
-        IQueryable<Entity> NonCacheEntityQuery(Expression<Func<Entity, bool>> cndLambda = null, params IOrderByExpression<Entity>[] orders);
-
-        /// <summary>
-        /// 按条件查询实体数(不分页)支持复合排序
-        /// </summary>
-        /// <param name="cndLambda">条件</param>
-        /// <param name="orders">排序</param>
-        /// <returns></returns>
-        IQueryable<Entity> EntityQuery(Expression<Func<Entity, bool>> cndLambda = null, params IOrderByExpression<Entity>[] orders);
-
-        /// <summary>
-        /// 按条件查询实体数,分页获取,并返回总记录数
-        /// </summary>
-        /// <typeparam name="S">类型参数,排序对象的类型</typeparam>
-        /// <param name="where"></param>
-        /// <param name="isASC"></param>
-        /// <param name="order"></param>
-        /// <param name="page"></param>
-        /// <param name="rows"></param>
-        /// <param name="a"></param>
-        /// <returns></returns>
-        IQueryable<Entity> EntityQuery(Expression<Func<Entity, bool>> where, bool isASC, Expression<Func<Entity, object>> order, int page, int rows, out int a);
-
-        /// <summary>
-        /// 获取所有数据 禁用缓存
-        /// </summary>
-        /// <returns></returns>
-        IQueryable<Entity> NonCacheEntityQuery();
-
-        /// <summary>
-        /// 根据条件查询单条数据
-        /// </summary>
-        /// <param name="whereLambda"></param>
-        /// <returns></returns>
-        Entity Find(Expression<Func<Entity, bool>> whereLambda);
-
-        /// <summary>
-        /// 根据条件查询单条数据
-        /// </summary>
-        /// <param name="whereLambda"></param>
-        /// <returns></returns>
-        Entity NonCacheFind(Expression<Func<Entity, bool>> whereLambda);
         #endregion
+
+        #region 无缓存查询
+
+        #endregion
+
     }
 }
