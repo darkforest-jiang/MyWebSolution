@@ -368,6 +368,175 @@ namespace DfHelper.EF.Base
 
         #endregion
 
+        #region 无缓存查询
+        /// <summary>
+        /// 获取一个实体
+        /// </summary>
+        /// <typeparam name="Entity"></typeparam>
+        /// <param name="where"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task<Entity?> NonCacheFirstOrDefault<Entity>(Expression<Func<Entity, bool>> where, CancellationToken cancellationToken = default) where Entity : class
+        {
+            try
+            {
+                var entity = await _DbSet.Set<Entity>().Where(where).AsNoTracking().FirstOrDefaultAsync(cancellationToken);
+                return entity;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        /// <summary>
+        /// 获取一个实体
+        /// </summary>
+        /// <typeparam name="Entity"></typeparam>
+        /// <param name="where"></param>
+        /// <param name="order"></param>
+        /// <param name="isAsc"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task<Entity?> NonCacheFirstOrDefault<Entity>(Expression<Func<Entity, bool>> where, Expression<Func<Entity, object>> order, bool isAsc = true, CancellationToken cancellationToken = default) where Entity : class
+        {
+            try
+            {
+                var query = _DbSet.Set<Entity>().Where(where).AsNoTracking();
+                if (isAsc)
+                {
+                    query = query.OrderBy(order);
+                }
+                else
+                {
+                    query = query.OrderByDescending(order);
+                }
+                var entity = await query.FirstOrDefaultAsync(cancellationToken);
+                return entity;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        /// <summary>
+        /// 获取一个实体
+        /// </summary>
+        /// <typeparam name="Entity"></typeparam>
+        /// <param name="where"></param>
+        /// <param name="cancellationToken"></param>
+        /// <param name="orders"></param>
+        /// <returns></returns>
+        public async Task<Entity?> NonCacheFirstOrDefault<Entity>(Expression<Func<Entity, bool>> where, CancellationToken cancellationToken = default, params IOrderByExpression<Entity>[] orders) where Entity : class
+        {
+            try
+            {
+                var query = _DbSet.Set<Entity>().Where(where).AsNoTracking();
+
+                if (orders != null)
+                {
+                    query = GetOrderbyResult(query, orders);
+                }
+
+                var entity = await query.FirstOrDefaultAsync(cancellationToken);
+                return entity;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        /// <summary>
+        /// 获取实体记录条数
+        /// </summary>
+        /// <returns></returns>
+        public async Task<int> NonCacheEntityCount<Entity>(Expression<Func<Entity, bool>> where, CancellationToken cancellationToken = default) where Entity : class
+        {
+            try
+            {
+                return await _DbSet.Set<Entity>().AsNoTracking().CountAsync(where, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        /// <summary>
+        /// 获取所有数据
+        /// </summary>
+        /// <typeparam name="Entity"></typeparam>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public IQueryable<Entity> NonCacheEntityQuery<Entity>() where Entity : class
+        {
+            try
+            {
+                return _DbSet.Set<Entity>().AsNoTracking().AsQueryable();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        /// <summary>
+        /// 按条件获取数据
+        /// </summary>
+        /// <typeparam name="Entity"></typeparam>
+        /// <param name="where"></param>
+        /// <returns></returns>
+        public IQueryable<Entity> NonCacheEntityQuery<Entity>(Expression<Func<Entity, bool>> where) where Entity : class
+        {
+            try
+            {
+                return _DbSet.Set<Entity>().Where(where).AsNoTracking();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        /// <summary>
+        /// 获取所有数据
+        /// </summary>
+        /// <typeparam name="Entity"></typeparam>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task<IList<Entity>> NonCacheEntityQuery<Entity>(CancellationToken cancellationToken = default) where Entity : class
+        {
+            try
+            {
+                return await NonCacheEntityQuery<Entity>().ToListAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        /// <summary>
+        /// 按条件获取数据
+        /// </summary>
+        /// <typeparam name="Entity"></typeparam>
+        /// <param name="where"></param>
+        /// <returns></returns>
+        public async Task<IList<Entity>> NonCacheEntityQuery<Entity>(Expression<Func<Entity, bool>> where, CancellationToken cancellationToken = default) where Entity : class
+        {
+            try
+            {
+                return await NonCacheEntityQuery<Entity>(where).ToListAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+        #endregion
+
         /// <summary>
         /// 设置查询结果排序
         /// </summary>

@@ -142,7 +142,73 @@ namespace DfHelper.EF.Base
         #endregion
 
         #region 无缓存查询
+        /// <summary>
+        /// 获取一个实体
+        /// </summary>
+        /// <typeparam name="Entity"></typeparam>
+        /// <param name="where"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<Entity?> NonCacheFirstOrDefault<Entity>(Expression<Func<Entity, bool>> where, CancellationToken cancellationToken = default) where Entity : class;
 
+        /// <summary>
+        /// 获取一个实体
+        /// </summary>
+        /// <typeparam name="Entity"></typeparam>
+        /// <param name="where"></param>
+        /// <param name="order"></param>
+        /// <param name="isAsc"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<Entity?> NonCacheFirstOrDefault<Entity>(Expression<Func<Entity, bool>> where, Expression<Func<Entity, object>> order, bool isAsc = true, CancellationToken cancellationToken = default) where Entity : class;
+
+        /// <summary>
+        /// 获取一个实体
+        /// </summary>
+        /// <typeparam name="Entity"></typeparam>
+        /// <param name="where"></param>
+        /// <param name="cancellationToken"></param>
+        /// <param name="orders"></param>
+        /// <returns></returns>
+        Task<Entity?> NonCacheFirstOrDefault<Entity>(Expression<Func<Entity, bool>> where, CancellationToken cancellationToken = default, params IOrderByExpression<Entity>[] orders) where Entity : class;
+
+        /// <summary>
+        /// 获取实体记录条数
+        /// </summary>
+        /// <returns></returns>
+        Task<int> NonCacheEntityCount<Entity>(Expression<Func<Entity, bool>> where, CancellationToken cancellationToken = default) where Entity : class;
+
+        /// <summary>
+        /// 获取所有数据
+        /// </summary>
+        /// <typeparam name="Entity"></typeparam>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        IQueryable<Entity> NonCacheEntityQuery<Entity>() where Entity : class;
+
+        /// <summary>
+        /// 按条件获取数据
+        /// </summary>
+        /// <typeparam name="Entity"></typeparam>
+        /// <param name="where"></param>
+        /// <returns></returns>
+        IQueryable<Entity> NonCacheEntityQuery<Entity>(Expression<Func<Entity, bool>> where) where Entity : class;
+
+        /// <summary>
+        /// 获取所有数据
+        /// </summary>
+        /// <typeparam name="Entity"></typeparam>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<IList<Entity>> NonCacheEntityQuery<Entity>(CancellationToken cancellationToken = default) where Entity : class;
+
+        /// <summary>
+        /// 按条件获取数据
+        /// </summary>
+        /// <typeparam name="Entity"></typeparam>
+        /// <param name="where"></param>
+        /// <returns></returns>
+        Task<IList<Entity>> NonCacheEntityQuery<Entity>(Expression<Func<Entity, bool>> where, CancellationToken cancellationToken = default) where Entity : class;
         #endregion
 
     }
