@@ -8,7 +8,7 @@ namespace DfConfig.GrpcServices
 {
     public class AppKeyGrpcService : IAppKeyGrpcService
     {
-        private readonly IBaseService<DfConfigDbContextBase> _baseService;
+        private readonly IBaseService<DbContextBase> _baseService;
 
         public AppKeyGrpcService()
         {

@@ -10,7 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCodeFirstGrpc();//添加Grpc服务
 builder.Services.AddCodeFirstGrpcReflection();//添加Grpc反射
 
-builder.Services.AddScoped<DfConfigDbContextBase, DfConfigSqlserverDbContext>();
+builder.Services.AddScoped<DbContextBase, DbContextBase>(sp => {
+    return DbContextBase.GetContext();
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
